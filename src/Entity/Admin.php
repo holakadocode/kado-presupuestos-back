@@ -3,70 +3,46 @@
 namespace App\Entity;
 
 use App\Repository\AdminRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: AdminRepository::class)]
-class Admin
+class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
+
+    #[ORM\Column]
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $dateTime = null;
+
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $salt = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $email = null;
+    private ?string $surname = null;
 
     #[ORM\Column]
-    private ?bool $superAdmin = null;
+    private ?int $salt = null;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getSalt(): ?string
-    {
-        return $this->salt;
-    }
-
-    public function setSalt(string $salt): static
-    {
-        $this->salt = $salt;
-
-        return $this;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
-
-        return $this;
     }
 
     public function getEmail(): ?string
@@ -81,14 +57,103 @@ class Admin
         return $this;
     }
 
-    public function isSuperAdmin(): ?bool
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->superAdmin;
+        return (string) $this->email;
     }
 
-    public function setSuperAdmin(bool $superAdmin): static
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->superAdmin = $superAdmin;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getDateTime(): ?\DateTimeInterface
+    {
+        return $this->dateTime;
+    }
+
+    public function setDateTime(\DateTimeInterface $dateTime): static
+    {
+        $this->dateTime = $dateTime;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getSurname(): ?string
+    {
+        return $this->surname;
+    }
+
+    public function setSurname(string $surname): static
+    {
+        $this->surname = $surname;
+
+        return $this;
+    }
+
+    public function getSalt(): ?int
+    {
+        return $this->salt;
+    }
+
+    public function setSalt(int $salt): static
+    {
+        $this->salt = $salt;
 
         return $this;
     }

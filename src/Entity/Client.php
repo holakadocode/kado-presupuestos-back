@@ -46,6 +46,9 @@ class Client
     #[ORM\OneToMany(targetEntity: Budget::class, mappedBy: 'client')]
     private Collection $budgets;
 
+    #[ORM\Column(length: 255)]
+    private ?string $surname = null;
+
     public function __construct()
     {
         $this->budgets = new ArrayCollection();
@@ -190,6 +193,18 @@ class Client
                 $budget->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSurname(): ?string
+    {
+        return $this->surname;
+    }
+
+    public function setSurname(string $surname): static
+    {
+        $this->surname = $surname;
 
         return $this;
     }
