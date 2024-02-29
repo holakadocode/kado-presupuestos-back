@@ -41,7 +41,7 @@ class ClientController extends AbstractController
             ->setSurname($data['surname'])
             ->setContactEmail($data['contactEmail'])
             ->setAddress($data['address'])
-            ->setCp($data['cp'])
+            ->setCp(intval($data['cp']))
             ->setCity($data['city'])
             ->setNif($data['nif'])
             ->setTlf($data['tlf'])
@@ -105,15 +105,15 @@ class ClientController extends AbstractController
             return new JsonResponse('Client not found', Response::HTTP_NOT_FOUND);
 
         $clientToEdit
-            ->setName($data['name'])
-            ->setSurname($data['surname'])
-            ->setContactEmail($data['contactEmail'])
-            ->setAddress($data['address'])
-            ->setCp($data['cp'])
-            ->setCity($data['city'])
-            ->setNif($data['nif'])
-            ->setTlf($data['tlf'])
-            ->setPrimaryKey($data['primaryKey'])
+            ->setName($data['payload']['name'])
+            ->setSurname($data['payload']['surname'])
+            ->setContactEmail($data['payload']['contactEmail'])
+            ->setAddress($data['payload']['address'])
+            ->setCp($data['payload']['cp'])
+            ->setCity($data['payload']['city'])
+            ->setNif($data['payload']['nif'])
+            ->setTlf($data['payload']['tlf'])
+            ->setPrimaryKey($data['payload']['primaryKey'])
             ->setDateTime(new \DateTime());
 
         $this->em->flush();
