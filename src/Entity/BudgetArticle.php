@@ -19,23 +19,27 @@ class BudgetArticle
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateTime = null;
 
+    #[ORM\ManyToOne(inversedBy: 'budgetArticles')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Budget $budget = null;
+
+    #[ORM\OneToOne(mappedBy: 'budgetArticle', cascade: ['persist', 'remove'])]
+    private ?Article $article = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $articleCode = null;
+
     #[ORM\Column(length: 255)]
     private ?string $nameArticle = null;
 
     #[ORM\Column]
-    private ?int $total = null;
+    private ?float $quantity = null;
 
-    #[ORM\OneToMany(targetEntity: Budget::class, mappedBy: 'budgetArticle')]
-    private Collection $budget;
+    #[ORM\Column]
+    private ?float $price = null;
 
-    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'budgetArticle')]
-    private Collection $articles;
-
-    public function __construct()
-    {
-        $this->budget = new ArrayCollection();
-        $this->articles = new ArrayCollection();
-    }
+    #[ORM\Column]
+    private ?float $total = null;
 
     public function getId(): ?int
     {
@@ -54,6 +58,47 @@ class BudgetArticle
         return $this;
     }
 
+    public function getBudget(): ?Budget
+    {
+        return $this->budget;
+    }
+
+    public function setBudget(?Budget $budget): static
+    {
+        $this->budget = $budget;
+
+        return $this;
+    }
+
+    public function getArticle(): ?Article
+    {
+        return $this->article;
+    }
+
+    public function setArticle(Article $article): static
+    {
+        // set the owning side of the relation if necessary
+        if ($article->getBudgetArticle() !== $this) {
+            $article->setBudgetArticle($this);
+        }
+
+        $this->article = $article;
+
+        return $this;
+    }
+
+    public function getArticleCode(): ?string
+    {
+        return $this->articleCode;
+    }
+
+    public function setArticleCode(?string $articleCode): static
+    {
+        $this->articleCode = $articleCode;
+
+        return $this;
+    }
+
     public function getNameArticle(): ?string
     {
         return $this->nameArticle;
@@ -66,75 +111,40 @@ class BudgetArticle
         return $this;
     }
 
-    public function getTotal(): ?int
+    public function getQuantity(): ?float
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(float $quantity): static
+    {
+        $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(float $price): static
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    public function getTotal(): ?float
     {
         return $this->total;
     }
 
-    public function setTotal(int $total): static
+    public function setTotal(float $total): static
     {
         $this->total = $total;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Budget>
-     */
-    public function getBudget(): Collection
-    {
-        return $this->budget;
-    }
-
-    public function addBudget(Budget $budget): static
-    {
-        if (!$this->budget->contains($budget)) {
-            $this->budget->add($budget);
-            $budget->setBudgetArticle($this);
-        }
-
-        return $this;
-    }
-
-    public function removeBudget(Budget $budget): static
-    {
-        if ($this->budget->removeElement($budget)) {
-            // set the owning side to null (unless already changed)
-            if ($budget->getBudgetArticle() === $this) {
-                $budget->setBudgetArticle(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Article>
-     */
-    public function getArticles(): Collection
-    {
-        return $this->articles;
-    }
-
-    public function addArticle(Article $article): static
-    {
-        if (!$this->articles->contains($article)) {
-            $this->articles->add($article);
-            $article->setBudgetArticle($this);
-        }
-
-        return $this;
-    }
-
-    public function removeArticle(Article $article): static
-    {
-        if ($this->articles->removeElement($article)) {
-            // set the owning side to null (unless already changed)
-            if ($article->getBudgetArticle() === $this) {
-                $article->setBudgetArticle(null);
-            }
-        }
-
-        return $this;
-    }
 }

@@ -17,28 +17,29 @@ class Article
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateTime = null;
 
+    #[ORM\ManyToOne(inversedBy: 'articles')]
+    private ?FamilyFolder $familyFolder = null;
+
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
     private ?string $code = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $distributorCode = null;
 
-    #[ORM\Column]
-    private ?int $distributorPrice = null;
+    #[ORM\Column(nullable: true)]
+    private ?float $distributorPrice = null;
 
     #[ORM\Column]
-    private ?int $price = null;
+    private ?float $price = null;
 
-    #[ORM\ManyToOne(inversedBy: 'articles')]
-    private ?FamilyFolder $family = null;
-
-    #[ORM\ManyToOne(inversedBy: 'articles')]
+    #[ORM\OneToOne(inversedBy: 'article', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
     private ?BudgetArticle $budgetArticle = null;
 
     public function getId(): ?int
@@ -54,6 +55,18 @@ class Article
     public function setDateTime(\DateTimeInterface $dateTime): static
     {
         $this->dateTime = $dateTime;
+
+        return $this;
+    }
+
+    public function getFamilyFolder(): ?FamilyFolder
+    {
+        return $this->familyFolder;
+    }
+
+    public function setFamilyFolder(?FamilyFolder $familyFolder): static
+    {
+        $this->familyFolder = $familyFolder;
 
         return $this;
     }
@@ -75,7 +88,7 @@ class Article
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 
@@ -99,45 +112,33 @@ class Article
         return $this->distributorCode;
     }
 
-    public function setDistributorCode(string $distributorCode): static
+    public function setDistributorCode(?string $distributorCode): static
     {
         $this->distributorCode = $distributorCode;
 
         return $this;
     }
 
-    public function getDistributorPrice(): ?int
+    public function getDistributorPrice(): ?float
     {
         return $this->distributorPrice;
     }
 
-    public function setDistributorPrice(int $distributorPrice): static
+    public function setDistributorPrice(?float $distributorPrice): static
     {
         $this->distributorPrice = $distributorPrice;
 
         return $this;
     }
 
-    public function getPrice(): ?int
+    public function getPrice(): ?float
     {
         return $this->price;
     }
 
-    public function setPrice(int $price): static
+    public function setPrice(float $price): static
     {
         $this->price = $price;
-
-        return $this;
-    }
-
-    public function getFamily(): ?FamilyFolder
-    {
-        return $this->family;
-    }
-
-    public function setFamily(?FamilyFolder $family): static
-    {
-        $this->family = $family;
 
         return $this;
     }
@@ -147,7 +148,7 @@ class Article
         return $this->budgetArticle;
     }
 
-    public function setBudgetArticle(?BudgetArticle $budgetArticle): static
+    public function setBudgetArticle(BudgetArticle $budgetArticle): static
     {
         $this->budgetArticle = $budgetArticle;
 

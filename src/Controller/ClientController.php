@@ -43,7 +43,7 @@ class ClientController extends AbstractController
             ->setAddress($data['address'])
             ->setCp(intval($data['cp']))
             ->setCity($data['city'])
-            ->setNif($data['nif'])
+            ->setTaxIdentification($data['taxIdentification'])
             ->setTlf($data['tlf'])
             ->setPrimaryKey($data['primaryKey'])
             ->setDateTime(new \DateTime());
@@ -111,7 +111,7 @@ class ClientController extends AbstractController
             ->setAddress($data['payload']['address'])
             ->setCp($data['payload']['cp'])
             ->setCity($data['payload']['city'])
-            ->setNif($data['payload']['nif'])
+            ->setTaxIdentification($data['payload']['taxIdentification'])
             ->setTlf($data['payload']['tlf'])
             ->setPrimaryKey($data['payload']['primaryKey'])
             ->setDateTime(new \DateTime());
@@ -145,7 +145,7 @@ class ClientController extends AbstractController
                 'address' => $client->getAddress(),
                 'cp' => $client->getCp(),
                 'city' => $client->getCity(),
-                'nif' => $client->getNif(),
+                'taxIdentification' => $client->getTaxIdentification(),
                 'tlf' => $client->getTlf()
             ];
         }
@@ -172,7 +172,7 @@ class ClientController extends AbstractController
             'address' => $client->getAddress(),
             'cp' => $client->getCp(),
             'city' => $client->getCity(),
-            'nif' => $client->getNif(),
+            'taxIdentification' => $client->getTaxIdentification(),
             'tlf' => $client->getTlf(),
             'budget' => []
         ];
