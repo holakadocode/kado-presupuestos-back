@@ -34,14 +34,9 @@ class ProviderController extends AbstractController
     {
         $providers = $this->em->getRepository('App\Entity\Provider')->findAll();
 
-        // if (!$providers) {
-        //     return new JsonResponse('Provider not found', Response::HTTP_NOT_FOUND);
-        // }
-
         $response = [];
 
         foreach ($providers as $provider) {
-
             $response[] = [
                 'id' => $provider->getId(),
                 'codProvider' => $provider->getCodProvider(),
