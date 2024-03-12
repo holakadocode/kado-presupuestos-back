@@ -32,7 +32,7 @@ class Client
     private ?int $cp = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $nif = null;
+    private ?string $taxIdentification = null;
 
     #[ORM\Column(length: 255)]
     private ?string $city = null;
@@ -43,11 +43,11 @@ class Client
     #[ORM\Column(length: 255)]
     private ?string $primaryKey = null;
 
-    #[ORM\OneToMany(targetEntity: Budget::class, mappedBy: 'client')]
-    private Collection $budgets;
-
     #[ORM\Column(length: 255)]
     private ?string $surname = null;
+
+    #[ORM\OneToMany(targetEntity: Budget::class, mappedBy: 'client', orphanRemoval: true)]
+    private Collection $budgets;
 
     public function __construct()
     {
@@ -119,14 +119,14 @@ class Client
         return $this;
     }
 
-    public function getNif(): ?string
+    public function getTaxIdentification(): ?string
     {
-        return $this->nif;
+        return $this->taxIdentification;
     }
 
-    public function setNif(string $nif): static
+    public function setTaxIdentification(string $taxIdentification): static
     {
-        $this->nif = $nif;
+        $this->taxIdentification = $taxIdentification;
 
         return $this;
     }
@@ -167,6 +167,18 @@ class Client
         return $this;
     }
 
+    public function getSurname(): ?string
+    {
+        return $this->surname;
+    }
+
+    public function setSurname(string $surname): static
+    {
+        $this->surname = $surname;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Budget>
      */
@@ -193,18 +205,6 @@ class Client
                 $budget->setClient(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getSurname(): ?string
-    {
-        return $this->surname;
-    }
-
-    public function setSurname(string $surname): static
-    {
-        $this->surname = $surname;
 
         return $this;
     }

@@ -18,7 +18,7 @@ class FamilyFolder
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'family')]
+    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'familyFolder')]
     private Collection $articles;
 
     public function __construct()
@@ -55,7 +55,7 @@ class FamilyFolder
     {
         if (!$this->articles->contains($article)) {
             $this->articles->add($article);
-            $article->setFamily($this);
+            $article->setFamilyFolder($this);
         }
 
         return $this;
@@ -65,8 +65,8 @@ class FamilyFolder
     {
         if ($this->articles->removeElement($article)) {
             // set the owning side to null (unless already changed)
-            if ($article->getFamily() === $this) {
-                $article->setFamily(null);
+            if ($article->getFamilyFolder() === $this) {
+                $article->setFamilyFolder(null);
             }
         }
 
