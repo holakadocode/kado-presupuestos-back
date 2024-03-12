@@ -126,12 +126,7 @@ class ClientController extends AbstractController
     #[Route('/list', name: 'api_client_list', methods: ['GET'])]
     public function api_client_list(): Response
     {
-
         $clients = $this->em->getRepository('App\Entity\Client')->findAll();
-
-        if (!$clients) {
-            return new JsonResponse('Clients not found', Response::HTTP_NOT_FOUND);
-        }
 
         $response = [];
 
