@@ -148,7 +148,7 @@ class ClientController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
-    #[Route('/get', name: 'api_client_get', methods: ['GET'])]
+    #[Route('/get', name: 'api_client_get', methods: ['POST'])]
     public function api_client_get(): Response
     {
         $data = json_decode($this->request->getContent(), true);
@@ -169,15 +169,16 @@ class ClientController extends AbstractController
             'city' => $client->getCity(),
             'taxIdentification' => $client->getTaxIdentification(),
             'tlf' => $client->getTlf(),
-            'budget' => []
+            'budgets' => []
         ];
 
         foreach ($client->getBudgets() as $budget) {
-            $response['budget'][] = [
+            $response['budgets'][] = [
                 'id' => $budget->getId(),
                 'title' => $budget->getTitle(),
                 'iva' => $budget->getIva(),
                 'total' => $budget->getTotal(),
+
             ];
         }
 
