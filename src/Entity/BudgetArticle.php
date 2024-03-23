@@ -23,9 +23,6 @@ class BudgetArticle
     #[ORM\JoinColumn(nullable: false)]
     private ?Budget $budget = null;
 
-    #[ORM\OneToOne(mappedBy: 'budgetArticle', cascade: ['persist', 'remove'])]
-    private ?Article $article = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $articleCode = null;
 
@@ -69,24 +66,7 @@ class BudgetArticle
 
         return $this;
     }
-
-    public function getArticle(): ?Article
-    {
-        return $this->article;
-    }
-
-    public function setArticle(Article $article): static
-    {
-        // set the owning side of the relation if necessary
-        if ($article->getBudgetArticle() !== $this) {
-            $article->setBudgetArticle($this);
-        }
-
-        $this->article = $article;
-
-        return $this;
-    }
-
+    
     public function getArticleCode(): ?string
     {
         return $this->articleCode;
@@ -146,5 +126,4 @@ class BudgetArticle
 
         return $this;
     }
-
 }
