@@ -53,7 +53,8 @@ class BudgetController extends AbstractController
     {
         $data = json_decode($this->request->getContent(), true);
 
-        $company = $this->em->getRepository('App\Entity\Company')->findOneById(1);
+        $company = $this->em->getRepository('App\Entity\Company')->findAll();
+        $company = $company[0];
         $clients = $this->em->getRepository('App\Entity\Client')->findAll();
         $folders = $this->em->getRepository('App\Entity\FamilyFolder')->findAll();
 
@@ -129,7 +130,8 @@ class BudgetController extends AbstractController
         $data = json_decode($this->request->getContent(), true);
 
         $budget = $this->em->getRepository('App\Entity\Budget')->findOneById($data['budgetID']);
-        $company = $this->em->getRepository('App\Entity\Company')->findOneById(1);
+        $company = $this->em->getRepository('App\Entity\Company')->findAll();
+        $company = $company[0];
         $client = $this->em->getRepository('App\Entity\Client')->findOneById($data['clientID']);
         $clients = $this->em->getRepository('App\Entity\Client')->findAll();
         $folders = $this->em->getRepository('App\Entity\FamilyFolder')->findAll();
@@ -218,8 +220,9 @@ class BudgetController extends AbstractController
         if (!$budget || !$client)
             return new JsonResponse('Cliente o presupuesto no existe', Response::HTTP_NOT_FOUND);
 
-        $company = $this->em->getRepository('App\Entity\Company')->findOneById(1);
-
+        $company = $this->em->getRepository('App\Entity\Company')->findAll();
+        $company = $company[0];
+        
         $response['id'] = $budget->getId();
         $response['dateStamp'] = $budget->getDateTime()->format('d/m/Y');
         $response['title'] = $budget->getTitle();
@@ -308,6 +311,7 @@ class BudgetController extends AbstractController
         if (isset($data['payload']['client']['id']))
             $clientID = $data['payload']['client']['id'];
         else $clientID = $data['payload']['client'];
+
         $client = $this->em->getRepository('App\Entity\Client')->findOneById($clientID);
 
         $newBudget = new Budget;
@@ -364,7 +368,7 @@ class BudgetController extends AbstractController
         $this->em->persist($newBudget);
         $this->em->flush();
 
-        return new JsonResponse('', Response::HTTP_OK);
+        return new JsonResponse($client->getId(), Response::HTTP_OK);
     }
     #[Route('/update', name: 'api_budget_update', methods: ['POST'])]
     public function api_budget_update(): JsonResponse
