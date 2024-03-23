@@ -123,6 +123,91 @@ class BudgetController extends AbstractController
 
         return new JsonResponse($response, Response::HTTP_OK);
     }
+    #[Route('/update/get-data', name: 'api_budget_update_getData', methods: ['POST'])]
+    public function api_budget_update_getData(): JsonResponse
+    {
+        $data = json_decode($this->request->getContent(), true);
+
+        $budget = $this->em->getRepository('App\Entity\Budget')->findOneById($data['budgetID']);
+        $company = $this->em->getRepository('App\Entity\Company')->findOneById(1);
+        $client = $this->em->getRepository('App\Entity\Client')->findOneById($data['clientID']);
+        $clients = $this->em->getRepository('App\Entity\Client')->findAll();
+        $folders = $this->em->getRepository('App\Entity\FamilyFolder')->findAll();
+
+        $response['budget']['id'] = $budget->getId();
+        $response['budget']['dateStamp'] = $budget->getDateTime()->format('d/m/Y');
+        $response['budget']['title'] = $budget->getTitle();
+
+        foreach ($budget->getBudgetArticles() as $article) {
+            $response['articles'][] = [
+                'id' => $article->getId(),
+                'code' => $article->getArticleCode(),
+                'article' => $article->getNameArticle(),
+                'quantity' => $article->getQuantity(),
+                'price' => $article->getPrice(),
+                'total' => $article->getTotal(),
+            ];
+        }
+
+        $response['articlesSelector'] = [];
+        foreach ($folders as $folder) {
+            $response['articlesSelector'][] = [
+                'label' => $folder->getName(),
+                'value' => $folder->getName(),
+                'isFolder' => true
+            ];
+
+            foreach ($folder->getArticles() as $article) {
+                $response['articlesSelector'][] = [
+                    'label' => $article->getName(),
+                    'value' => $article->getId(),
+                ];
+            }
+        }
+
+        $response['ownCompany'] = [
+            'name' => $company->getName(),
+            'taxIdentification' => $company->getTaxIdentification(),
+            'address' => $company->getAddress(),
+            'cp' => $company->getCp(),
+            'city' => $company->getCity(),
+            'phone' => $company->getPhone(),
+            'email' => $company->getEmail(),
+        ];
+
+        $response['client'] = [];
+        $response['clientsSelector'] = [];
+
+        $response['client'] = [
+            'id' => $client->getId(),
+            'name' => $client->getName(),
+            'surname' => $client->getSurname(),
+            'email' => $client->getContactEmail(),
+            'address' => [
+                'name' => $client->getAddress(),
+                'cp' => $client->getCp(),
+                'city' => $client->getCity(),
+            ],
+            'taxIdentification' => $client->getTaxIdentification(),
+            'phone' => $client->getTlf()
+        ];
+
+        foreach ($clients as $client) {
+            $response['clients'][] = [
+                'label' => $client->getName() . ' - ' . $client->getSurname(),
+                'value' => $client->getId(),
+                'address' => $client->getAddress(),
+                'cp' => $client->getCp(),
+                'taxIdentification' => $client->getTaxIdentification(),
+                'city' => $client->getCity(),
+                'phone' => $client->getTlf(),
+                'email' => $client->getContactEmail(),
+            ];
+        }
+
+        return new JsonResponse($response, Response::HTTP_OK);
+    }
+
     #[Route('/get', name: 'api_budget_get', methods: ['POST'])]
     public function api_budget_get(): JsonResponse
     {
@@ -133,7 +218,7 @@ class BudgetController extends AbstractController
         if (!$budget || !$client)
             return new JsonResponse('Cliente o presupuesto no existe', Response::HTTP_NOT_FOUND);
 
-        $company = $this->em->getRepository('App\Entity\Company')->findOneById(1);      
+        $company = $this->em->getRepository('App\Entity\Company')->findOneById(1);
 
         $response['id'] = $budget->getId();
         $response['dateStamp'] = $budget->getDateTime()->format('d/m/Y');
@@ -264,12 +349,12 @@ class BudgetController extends AbstractController
                 ->setArticleCode($article['code'])
                 ->setNameArticle($article['article'])
                 ->setQuantity($article['quantity'])
-                ->setPrice($article['price'])
-                ->setTotal($article['total'])
+                ->setPrice(floatval($article['price']))
+                ->setTotal(floatval($article['price']) + $article['quantity'])
                 ->setBudget($newBudget);
             $this->em->persist($newArticle);
 
-            $subTotal =  $subTotal + $article['total'];
+            $subTotal =  $subTotal + $newArticle->getTotal();
         }
 
         $newBudget
@@ -277,6 +362,96 @@ class BudgetController extends AbstractController
             ->setTotal(($subTotal * 0.21) + $subTotal);
 
         $this->em->persist($newBudget);
+        $this->em->flush();
+
+        return new JsonResponse('', Response::HTTP_OK);
+    }
+    #[Route('/update', name: 'api_budget_update', methods: ['POST'])]
+    public function api_budget_update(): JsonResponse
+    {
+        $data = json_decode($this->request->getContent(), true);
+
+        $client = $this->em->getRepository('App\Entity\Client')->findOneById($data['clientID']);
+        $budget = $this->em->getRepository('App\Entity\Budget')->findOneById($data['budgetID']);
+        $oldBudgetArticles = $budget->getBudgetArticles();
+
+        $budget
+            ->setClient($client)
+            ->setClientName($client->getName())
+            ->setClientTaxIdentification($client->getTaxIdentification())
+            ->setClientEmail($client->getContactEmail())
+            ->setClientTlf($client->getTlf())
+            ->setClientAddress(
+                [
+                    'name' => $client->getAddress(),
+                    'cp' => $client->getCp(),
+                    'city' => $client->getCity(),
+                ]
+            )
+            ->setBudgetID($data['payload']['budgetID'])
+            ->setTitle($data['payload']['title'])
+            ->setIva($data['payload']['iva']);
+
+        // #[ORM\Column(nullable: true)]
+        // private ?float $subTotal = null;
+
+        // #[ORM\Column(nullable: true)]
+        // private ?float $total = null;
+
+        $this->em->flush();
+
+        $oldBudgetArticleIDs = [];
+        $newBudgetArticles = [];
+        foreach ($data['payload']['articles'] as $article) {
+            if (isset($article['id']))
+                $oldBudgetArticleIDs[] = $article['id'];
+            else
+                $newBudgetArticles[] = $article;
+        }
+
+        // Existing articles
+        $subTotal = 0;
+        foreach ($oldBudgetArticles as $article) {
+            if (in_array($article->getId(), $oldBudgetArticleIDs)) {
+                foreach ($data['payload']['articles'] as $payloadArticle) {
+                    if (isset($payloadArticle['id']) && $payloadArticle['id'] === $article->getId()) {
+                        $x = 1;
+                        $article
+                            ->setArticleCode($payloadArticle['code'])
+                            ->setNameArticle($payloadArticle['article'])
+                            ->setQuantity($payloadArticle['quantity'])
+                            ->setPrice($payloadArticle['price'])
+                            ->setTotal($payloadArticle['total'])
+                            ->setBudget($budget);
+                        $subTotal =  $subTotal + $payloadArticle['total'];
+                    }
+                }
+            } else
+                $this->em->remove($article);
+        }
+
+        // Add new Articles
+        $dateTime = new \DateTime();
+        foreach ($newBudgetArticles as $article) {
+            $newArticle = new BudgetArticle;
+            $newArticle
+                ->setDateTime($dateTime)
+                ->setArticleCode($article['code'])
+                ->setNameArticle($article['article'])
+                ->setQuantity($article['quantity'])
+                ->setPrice(floatval($article['price']))
+                ->setTotal(floatval($article['price']) * $article['quantity'])
+                ->setBudget($budget);
+            $this->em->persist($newArticle);
+
+            $subTotal =  $subTotal + $newArticle->getTotal();
+        }
+
+        $budget
+            ->setSubTotal($subTotal)
+            ->setTotal(($subTotal * 0.21) + $subTotal);
+
+        $this->em->persist($budget);
         $this->em->flush();
 
         return new JsonResponse('', Response::HTTP_OK);
@@ -307,8 +482,7 @@ class BudgetController extends AbstractController
     {
         $data = json_decode($this->request->getContent(), true);
 
-        $budget = $this->em->getRepository('App\Entity\Budget')->findOneBy($data['budgetID']);
-
+        $budget = $this->em->getRepository('App\Entity\Budget')->findOneById($data['budgetID']);
         $this->em->remove($budget);
         $this->em->flush();
 
