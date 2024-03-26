@@ -56,11 +56,13 @@ class Budget
     #[ORM\OneToMany(targetEntity: BudgetArticle::class, mappedBy: 'budget', orphanRemoval: true)]
     private Collection $budgetArticles;
 
+    
     public function __construct()
     {
         $this->budgetArticles = new ArrayCollection();
     }
 
+  
     public function getId(): ?int
     {
         return $this->id;
