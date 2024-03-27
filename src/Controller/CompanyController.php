@@ -29,57 +29,30 @@ class CompanyController extends AbstractController
         $this->validator = $validatorInterface;
     }
 
-    #[Route('/list', name: 'api_company_list', methods: ['GET'])]
-    public function api_company_list(): Response
+
+
+    #[Route('/get', name: 'api_company_get', methods: ['GET'])]
+    public function api_company_get(): Response
     {
+
+
         $company = $this->em->getRepository('App\Entity\Company')->findAll();
+
 
         $response = [];
 
-        foreach ($company as $company) {
-            $response[] = [
-                'id' => $company->getId(),
-                'name' => $company->getName(),
-                'taxIdentification' => $company->getTaxIdentification(),
-                'address' => $company->getAddress(),
-                'cp' => $company->getCp(),
-                'city' => $company->getCity(),
-                'phone' => $company->getPhone(),
-                'email' => $company->getEmail(),
-
+        if (isset($company[0]))
+            $response  = [
+                'name' => $company[0]->getName(),
+                'taxIdentification' => $company[0]->getTaxIdentification(),
+                'address' => $company[0]->getAddress(),
+                'cp' => $company[0]->getCp(),
+                'city' => $company[0]->getCity(),
+                'phone' => $company[0]->getPhone(),
+                'email' => $company[0]->getEmail(),
             ];
-        }
 
         return new JsonResponse($response, Response::HTTP_OK);
-    }
-
-    #[Route('/add', name: 'api_company_Add', methods: ['PUT'])]
-    public function api_company_add(): Response
-    {
-        $data = json_decode($this->request->getContent(), true);
-
-        $newCompany = new Company();
-        $newCompany
-            ->setName($data['name'])
-            ->setTaxIdentification($data['taxIdentification'])
-            ->setAddress($data['address'])
-            ->setCp($data['cp'])
-            ->setCity($data['city'])
-            ->setPhone($data['phone'])
-            ->setEmail($data['email']);
-           
-
-
-        $errors = $this->validator->validate($newCompany);
-
-        if (count($errors) > 0) {
-            return new JsonResponse('Validacion error', Response::HTTP_NOT_ACCEPTABLE);
-        }
-
-        $this->em->persist($newCompany);
-        $this->em->flush();
-
-        return new JsonResponse('Company add', Response::HTTP_OK);
     }
 
     #[Route('/edit', name: 'api_company_edit', methods: ['POST'])]
@@ -87,44 +60,33 @@ class CompanyController extends AbstractController
     {
         $data = json_decode($this->request->getContent(), true);
 
-        if (!$companyToEdit = $this->em->getRepository('App\Entity\Company')->findOneById($data['companyID']))
-            return new JsonResponse('Company not found', Response::HTTP_NOT_FOUND);
+        $company = $this->em->getRepository('App\Entity\Company')->findAll();
 
+        if (isset($company[0]))
+            $company[0]
+                ->setname($data['payload']['name'])
+                ->setTaxIdentification($data['payload']['taxIdentification'])
+                ->setAddress($data['payload']['address'])
+                ->setCp($data['payload']['cp'])
+                ->setCity($data['payload']['city'])
+                ->setPhone($data['payload']['phone'])
+                ->setEmail($data['payload']['email']);
+        else {
+            $newCompany = new Company;
+            $newCompany
+                ->setname($data['payload']['name'])
+                ->setTaxIdentification($data['payload']['taxIdentification'])
+                ->setAddress($data['payload']['address'])
+                ->setCp($data['payload']['cp'])
+                ->setCity($data['payload']['city'])
+                ->setPhone($data['payload']['phone'])
+                ->setEmail($data['payload']['email']);
 
-        $companyToEdit
-            ->setname($data['payload']['name'])
-            ->setTaxIdentification($data['payload']['taxIdentification'])
-            ->setAddress($data['payload']['address'])
-            ->setCp($data['payload']['cp'])
-            ->setCity($data['payload']['city'])
-            ->setPhone($data['payload']['phone'])
-            ->setEmail($data['payload']['email']);
-            
-            
+            $this->em->persist($newCompany);
+        }
+
 
         $this->em->flush();
         return new JsonResponse('Company edited', Response::HTTP_OK);
-    }
-
-    #[Route('/delete', name: 'api_company_delete', methods: ['DELETE'])]
-    public function api_company_delete(): Response
-    {
-        $data = json_decode($this->request->getContent(), true);
-
-        if (!$data || !isset($data['companyID'])) {
-            return new JsonResponse('Invalid company data', Response::HTTP_BAD_REQUEST);
-        }
-
-        $company = $this->em->getRepository('App\Entity\Company')->findOneById($data['companyID']);
-
-        if (!$company) {
-            return new JsonResponse('Company not found', Response::HTTP_NOT_FOUND);
-        }
-
-       
-        $this->em->remove($company);
-        $this->em->flush();
-
-        return new JsonResponse('Company deleted', Response::HTTP_OK);
     }
 }
