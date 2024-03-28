@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/company')]
 
@@ -17,28 +16,19 @@ class CompanyController extends AbstractController
 {
     private $em;
     private $request;
-    private $validator;
 
     function __construct(
         EntityManagerInterface $entityManagerInterface,
         RequestStack $requestStack,
-        ValidatorInterface $validatorInterface
     ) {
         $this->em = $entityManagerInterface;
         $this->request = $requestStack->getCurrentRequest();
-        $this->validator = $validatorInterface;
     }
-
-
 
     #[Route('/get', name: 'api_company_get', methods: ['GET'])]
     public function api_company_get(): Response
     {
-
-
         $company = $this->em->getRepository('App\Entity\Company')->findAll();
-
-
         $response = [];
 
         if (isset($company[0]))
@@ -84,7 +74,6 @@ class CompanyController extends AbstractController
 
             $this->em->persist($newCompany);
         }
-
 
         $this->em->flush();
         return new JsonResponse('Company edited', Response::HTTP_OK);
