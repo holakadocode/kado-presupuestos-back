@@ -32,7 +32,7 @@ class ExcelController extends AbstractController
 
 
 
-    #[Route('/test', name: 'test')]
+    #[Route('/test', name: 'testxls')]
     public function test(ParameterBagInterface $params)
     {
         // Create the spreadsheet
