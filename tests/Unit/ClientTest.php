@@ -19,15 +19,15 @@ class ClientTest extends TestCase
      */
     public function testCreateClient()
     {
-        $name= "Bartolo";
-        $surname = "Bartolillo";
+        $name= "Antonio";
+        $surname = "Rodriguez";
         $taxIdentification = "45454545X";
         $tlf = "956696969";
-        $contactEmail = "bartolo@kk.es";
+        $contactEmail = "antonioro@gmail.es";
         $address = "calle 1";
         $cp = "11002";
         $city = "Kentuki";
-        $primaryKey = "holaKase";
+        
 
         $client = new Client();
         $client
@@ -39,7 +39,7 @@ class ClientTest extends TestCase
             ->setAddress($address)
             ->setCp($cp)
             ->setCity($city)
-            ->setPrimaryKey($primaryKey);
+            ;
 
         //Asertions
         $this->assertEquals($surname, $client->getSurname());
