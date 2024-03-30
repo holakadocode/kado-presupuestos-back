@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ArticleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -38,9 +40,13 @@ class Article
     #[ORM\Column]
     private ?float $price = null;
 
-    #[ORM\OneToOne(inversedBy: 'article', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?BudgetArticle $budgetArticle = null;
+    #[ORM\OneToMany(targetEntity: BudgetArticle::class, mappedBy: 'article', orphanRemoval: true)]
+    private Collection $budgetArticle;
+
+    public function __construct()
+    {
+        $this->budgetArticle = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -143,14 +149,32 @@ class Article
         return $this;
     }
 
-    public function getBudgetArticle(): ?BudgetArticle
+    /**
+     * @return Collection<int, BudgetArticle>
+     */
+    public function getBudgetArticle(): Collection
     {
         return $this->budgetArticle;
     }
 
-    public function setBudgetArticle(BudgetArticle $budgetArticle): static
+    public function addBudgetArticle(BudgetArticle $budgetArticle): static
     {
-        $this->budgetArticle = $budgetArticle;
+        if (!$this->budgetArticle->contains($budgetArticle)) {
+            $this->budgetArticle->add($budgetArticle);
+            $budgetArticle->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBudgetArticle(BudgetArticle $budgetArticle): static
+    {
+        if ($this->budgetArticle->removeElement($budgetArticle)) {
+            // set the owning side to null (unless already changed)
+            if ($budgetArticle->getArticle() === $this) {
+                $budgetArticle->setArticle(null);
+            }
+        }
 
         return $this;
     }
