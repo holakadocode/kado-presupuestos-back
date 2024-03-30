@@ -2,18 +2,18 @@
 
 namespace App\Tests\Integration;
 
-use App\Entity\Client;
+use App\Entity\Budget;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 
 /**
- * Class ClientTest
+ * Class BudgetTest
  * @package App\Tests\Integration
  * 
- * Test Client entity
+ * Test Budget entity
  */
-class ClientTest extends KernelTestCase
+class BudgetTest extends KernelTestCase
 {
     /**
      * @var EntityManager
@@ -32,13 +32,13 @@ class ClientTest extends KernelTestCase
             ->getManager();
     }
 
-    public function testSearchByName()
+    public function testSearchByTitle()
     {
-        $client = $this->entityManager
-            ->getRepository(Client::class)
-            ->findOneBy(['name' => 'Antonio']);
+        $budget = $this->entityManager
+            ->getRepository(Budget::class)
+            ->findOneBy(['budgetID' => 'P-0003']);
 
-        $this->assertSame('49358479', $client->getTaxIdentification());
+        $this->assertSame('Presupuesto 1', $budget->getTitle());
     }
     protected function tearDown(): void
     {

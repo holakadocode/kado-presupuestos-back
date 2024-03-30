@@ -2,18 +2,18 @@
 
 namespace App\Tests\Integration;
 
-use App\Entity\Client;
+use App\Entity\Provider;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 
 /**
- * Class ClientTest
+ * Class ProviderTest
  * @package App\Tests\Integration
  * 
- * Test Client entity
+ * Test Provider entity
  */
-class ClientTest extends KernelTestCase
+class ProviderTest extends KernelTestCase
 {
     /**
      * @var EntityManager
@@ -34,11 +34,11 @@ class ClientTest extends KernelTestCase
 
     public function testSearchByName()
     {
-        $client = $this->entityManager
-            ->getRepository(Client::class)
-            ->findOneBy(['name' => 'Antonio']);
+        $provider = $this->entityManager
+            ->getRepository(Provider::class)
+            ->findOneBy(['nameCompany' => 'Elecam']);
 
-        $this->assertSame('49358479', $client->getTaxIdentification());
+        $this->assertSame('434534', $provider->getNif());
     }
     protected function tearDown(): void
     {
