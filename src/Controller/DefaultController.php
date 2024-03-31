@@ -10,16 +10,6 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api')]
 class DefaultController extends AbstractController
 {
-    #[Route('/login', name: 'admin_login')]
-    public function adminLogin(): Response
-    {
-        return $this->render('Admin/AdminLogin.html.twig', [
-            'test' => 'x',
-        ]);
-    }
-
-
-
     #[Route('/test', name: 'test', methods: ['GET'])]
     public function test()
     {
