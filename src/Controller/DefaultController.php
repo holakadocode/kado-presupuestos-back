@@ -3,13 +3,11 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse as HttpFoundationJsonResponse;
-use Symfony\test\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api')]
-
 class DefaultController extends AbstractController
 {
     #[Route('/login', name: 'admin_login')]
@@ -25,6 +23,6 @@ class DefaultController extends AbstractController
     #[Route('/test', name: 'test', methods: ['GET'])]
     public function test()
     {
-        return new HttpFoundationJsonResponse('holi chuli', Response::HTTP_OK);
+        return new JsonResponse('holi chuli', Response::HTTP_OK);
     }
 }
