@@ -39,6 +39,11 @@ class StorageController extends AbstractController
                 $articles[] = [
                     "id" => $article->getId(),
                     "name" => $article->getName(),
+                    "description" => $article->getDescription(),
+                    "code" => $article->getCode(),
+                    "distributorCode" => $article->getDistributorCode(),
+                    "distributorPrice" => $article->getDistributorPrice(),
+                    "price" => $article->getPrice(),
                 ];
             }
 
@@ -59,12 +64,12 @@ class StorageController extends AbstractController
         $data = json_decode($this->request->getContent(), true);
 
         $newFolder = new FamilyFolder();
-        $newFolder->setName($data["nombreCarpeta"]);
+        $newFolder->setName($data["payload"]["nameFolder"]);
 
         $this->em->persist($newFolder);
         $this->em->flush();
 
-        return new JsonResponse($data["nombreCarpeta"], Response::HTTP_OK);
+        return new JsonResponse('', Response::HTTP_OK);
     }
 
     #[Route('/articleAdd', name: 'api_article_add', methods: ['PUT'])]
@@ -91,40 +96,15 @@ class StorageController extends AbstractController
         return new JsonResponse("", Response::HTTP_OK);
     }
 
-    #[Route('/delete/{articleID}', name: 'api_article_delete', methods: ['DELETE'])]
-    public function api_article_delete($articleID): Response
+    #[Route('/edit', name: 'api_storage_edit', methods: ['POST'])]
+    public function api_storage_edit(): Response
     {
-
-        //$data = json_decode($this->request->getContent(), true);
-
-        // if (!$data || !isset($data['articleID'])) {
-        //     return new JsonResponse('Invalid article data', Response::HTTP_BAD_REQUEST);
-        // }
-
-        $article = $this->em->getRepository('App\Entity\Article')->findOneById($articleID);
-
-        if (!$article) {
-            return new JsonResponse('Article not found', Response::HTTP_NOT_FOUND);
-        }
-
-        $this->em->remove($article);
-        $this->em->flush();
-
-        return new JsonResponse('Article deleted', Response::HTTP_OK);
-    }
-
-    #[Route('/edit/{articleID}', name: 'api_storage_edit', methods: ['POST'])]
-    public function api_storage_edit($articleID): Response
-    {
+        // FALLA
         $data = json_decode($this->request->getContent(), true);
 
-        $familyFolder = $this->em->getRepository('App/Entity/FamilyFolder')->findOneById($data['id']);
-
-        $articleToEdit = $this->em->getRepository('App/Entity/Article')->findOneById($articleID);
+        $articleToEdit = $this->em->getRepository('App/Entity/Article')->findOneById($data['articleID']);
 
         $articleToEdit
-            ->setFamilyFolder($familyFolder)
-            ->setDateTime(new \DateTime())
             ->setName($data["payload"]["name"])
             ->setDescription($data["payload"]["description"])
             ->setCode($data["payload"]["code"])
@@ -136,4 +116,20 @@ class StorageController extends AbstractController
 
         return new JsonResponse('Client edited', Response::HTTP_OK);
     }
+
+    #[Route('/delete', name: 'api_article_delete', methods: ['DELETE'])]
+    public function api_article_delete(): Response
+    {
+        $data = json_decode($this->request->getContent(), true);
+
+        $article = $this->em->getRepository('App\Entity\Article')->findOneById($data['articleID']);
+        if (!$article) {
+            return new JsonResponse('Article not found', Response::HTTP_NOT_FOUND);
+        }
+        
+        $this->em->remove($article);
+        $this->em->flush();
+
+        return new JsonResponse('', Response::HTTP_OK);
+    }    
 }
