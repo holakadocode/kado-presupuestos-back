@@ -35,6 +35,11 @@ class ExcelController extends AbstractController
     #[Route('/budgetXls', name: 'budgetXls')]
     public function budgetXls(ParameterBagInterface $params)
     {
+        $data = json_decode($this->request->getContent(), true);
+
+        $budget = $this->em->getRepository('App\Entity\Budget')->findOneById($data['budgetID']);
+        $client = $this->em->getRepository('App\Entity\Client')->findOneById($data['clientID']);
+
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getDefaultStyle()->applyFromArray([
             'font' => [
@@ -43,21 +48,21 @@ class ExcelController extends AbstractController
             ]
         ]);
 
-        $sheet = $spreadsheet->getActiveSheet()->setTitle('budget.title'); //////////////////////CODIGO PRESUPEUSTO MEJOR
+        $sheet = $spreadsheet->getActiveSheet()->setTitle('P-000' . $budget->getId());
 
         // Borders
-        $topBorderThinStyle = ['borders' => ['top' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]];
+        // $topBorderThinStyle = ['borders' => ['top' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]];
         $rightBorderThinStyle = ['borders' => ['right' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]];
         $bottomBorderThinStyle = ['borders' => ['bottom' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]];
-        $leftBorderThinStyle = ['borders' => ['left' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]];
-        $bordersThinStyle = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
+        // $leftBorderThinStyle = ['borders' => ['left' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]];
+        // $bordersThinStyle = [
+        //     'borders' => [
+        //         'allBorders' => [
+        //             'borderStyle' => Border::BORDER_THIN,
+        //             'color' => ['argb' => 'FF000000'],
+        //         ],
+        //     ],
+        // ];
 
 
         // Set height and width
@@ -102,15 +107,6 @@ class ExcelController extends AbstractController
         $sheet->getStyle([1, 10, 5, 10])->getFill()->setFillType('solid')->getStartColor()->setRGB('373837');
         $sheet->getStyle([1, 10, 5, 10])->getFont()->getColor()->setRGB('ffffff');
 
-
-
-        // DATOS ////
-
-        $data = json_decode($this->request->getContent(), true);
-
-        $budget = $this->em->getRepository('App\Entity\Budget')->findOneById($data['budgetID']);
-        $client = $this->em->getRepository('App\Entity\Client')->findOneById($data['clientID']);
-
         $sheet
             ->setCellValue([1, 3], 'Cliente')
             ->setCellValue([1, 4], $client->getName())
@@ -119,9 +115,8 @@ class ExcelController extends AbstractController
             ->setCellValue([1, 7], "{$client->getTlf()} - {$client->getContactEmail()}")
 
             ->setCellValue([3, 3], 'Presupuesto')
-            // ->setCellValue([3, 4], $budget->getCode())   /////////////////////////////////////////////
-            ->setCellValue([3, 4], 'CODIGO ????')
-            ->setCellValue([3, 5], $budget->getDateTime())
+            ->setCellValue([3, 4], 'P-000' . $budget->getId())
+            ->setCellValue([3, 5], $budget->getDateTime()->format('d/m/Y'))
 
             ->setCellValue([1, 10], 'Código')
             ->setCellValue([2, 10], 'Artículo')
@@ -130,20 +125,21 @@ class ExcelController extends AbstractController
             ->setCellValue([5, 10], 'Total');
 
 
-        $total = 0;
+        $subTotal = 0;
         $currentRow = 11;
 
         foreach ($budget->getBudgetArticles() as $article) {   //////////////////////////////////////
             $sheet->getRowDimension($currentRow)->setRowHeight(22);
 
+            $totalLinePrice = $article->getQuantity() * $article->getPrice();
             $sheet
                 ->setCellValue([1, $currentRow], $article->getArticleCode())
                 ->setCellValue([2, $currentRow], $article->getNameArticle())
                 ->setCellValue([3, $currentRow], $article->getQuantity())
                 ->setCellValue([4, $currentRow], $article->getPrice())
-                ->setCellValue([5, $currentRow], $article->getTotal());
+                ->setCellValue([5, $currentRow], $totalLinePrice);
 
-            $total = $total + $article->getTotal();
+            $subTotal = $subTotal + $totalLinePrice;
             $currentRow++;
         }
         $currentRow--;
@@ -164,11 +160,11 @@ class ExcelController extends AbstractController
             ->setCellValue([2, $currentRow + 4], 'IVA %    ')
             ->setCellValue([2, $currentRow + 5], '21%')
             ->setCellValue([3, $currentRow + 4], 'IVA TOTAL')
-            ->setCellValue([3, $currentRow + 5], '????')  /////////////////////////////////////////////////////////////
+            ->setCellValue([3, $currentRow + 5], $subTotal * 0.21)  /////////////////////////////////////////////////////////////
             ->setCellValue([4, $currentRow + 4], 'SUBTOTAL')
-            ->setCellValue([4, $currentRow + 5], '????')  ///////////////////////////////////////////////////////////////
+            ->setCellValue([4, $currentRow + 5], $subTotal)  ///////////////////////////////////////////////////////////////
             ->setCellValue([5, $currentRow + 4], 'TOTAL')
-            ->setCellValue([5, $currentRow + 5], $total);
+            ->setCellValue([5, $currentRow + 5], $subTotal * 1.21);
 
         $sheet->getStyle([5, $currentRow + 4, 5, $currentRow + 5])->applyFromArray($rightBorderThinStyle);
         $sheet->getStyle([1, $currentRow + 4, 5, $currentRow + 5])->applyFromArray($bottomBorderThinStyle);
