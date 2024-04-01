@@ -37,9 +37,6 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $surname = null;
 
-    #[ORM\Column]
-    private ?int $salt = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -142,18 +139,6 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     public function setSurname(string $surname): static
     {
         $this->surname = $surname;
-
-        return $this;
-    }
-
-    public function getSalt(): ?int
-    {
-        return $this->salt;
-    }
-
-    public function setSalt(int $salt): static
-    {
-        $this->salt = $salt;
 
         return $this;
     }

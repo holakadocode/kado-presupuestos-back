@@ -354,7 +354,7 @@ class BudgetController extends AbstractController
                 ->setNameArticle($article['article'])
                 ->setQuantity($article['quantity'])
                 ->setPrice(floatval($article['price']))
-                ->setTotal(floatval($article['price']) + $article['quantity'])
+                ->setTotal(floatval($article['price']) * $article['quantity'])
                 ->setBudget($newBudget);
             $this->em->persist($newArticle);
 
