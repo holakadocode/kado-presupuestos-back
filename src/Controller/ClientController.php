@@ -37,15 +37,15 @@ class ClientController extends AbstractController
 
         $newClient = new Client();
         $newClient
-            ->setName($data['name'])
-            ->setSurname($data['surname'])
-            ->setContactEmail($data['contactEmail'])
-            ->setAddress($data['address'])
-            ->setCp(intval($data['cp']))
-            ->setCity($data['city'])
-            ->setTaxIdentification($data['taxIdentification'])
-            ->setTlf($data['tlf'])
-            ->setPrimaryKey($data['primaryKey'])
+            ->setName($data['payload']['name'])
+            ->setSurname($data['payload']['surname'])
+            ->setContactEmail($data['payload']['contactEmail'])
+            ->setAddress($data['payload']['address'])
+            ->setCp(intval($data['payload']['cp']))
+            ->setCity($data['payload']['city'])
+            ->setTaxIdentification($data['payload']['taxIdentification'])
+            ->setTlf($data['payload']['tlf'])
+            ->setPrimaryKey($data['payload']['primaryKey'])
             ->setDateTime(new \DateTime());
 
 
