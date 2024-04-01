@@ -69,8 +69,7 @@ class AdminController extends AbstractController
             ->setRoles([])
             ->setPassword($hashedPassword)
             ->setName($data['payload']['name'])
-            ->setSurname($data['payload']['surname'])
-            ->setSalt(0);
+            ->setSurname($data['payload']['surname']);
 
         $errors = $this->validator->validate($newAdmin);
 

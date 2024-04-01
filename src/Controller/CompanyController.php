@@ -25,6 +25,19 @@ class CompanyController extends AbstractController
         $this->request = $requestStack->getCurrentRequest();
     }
 
+    #[Route('/check_company', name: 'api_company_check_company', methods: ['GET'])]
+    public function api_company_check_company(): Response
+    {
+        $company = $this->em->getRepository('App\Entity\Company')->findAll();
+
+        if (isset($company[0]))
+            $response = true;
+        else
+            $response = false;
+
+        return new JsonResponse($response, Response::HTTP_OK);
+    }
+
     #[Route('/get', name: 'api_company_get', methods: ['GET'])]
     public function api_company_get(): Response
     {

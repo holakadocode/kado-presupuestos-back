@@ -21,7 +21,6 @@ class AdminTest extends TestCase
     {
         $name = "Antonio";
         $surname = "Rodriguez";
-        $salt = 45454545;
         $email = "antonioro@gmail.es";
         $roles = [];
         $password = "11002";
@@ -32,7 +31,6 @@ class AdminTest extends TestCase
         $admin
             ->setName($name)
             ->setSurname($surname)
-            ->setSalt($salt)
             ->setEmail($email)
             ->setRoles($roles)
             ->setPassword($password)
